@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    restart: always
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'DomainName=ranjivosti.tvojadomena.org'
+      - 'traefik.http.services.ranjivosti.loadbalancer.server.port=3000'

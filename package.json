@@ -1,0 +1,14 @@
+{
+  "name": "demo-ranjivosti",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env frontend.js"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  }
+}

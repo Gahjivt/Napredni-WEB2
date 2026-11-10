@@ -1,0 +1,9 @@
+<h2>Ostavite recenziju za artik</h2>
+{{messages}}
+<form method="POST" action="/guestbook">
+  <p><input name="message" size="60" maxlength="500" placeholder="Poruka" required></p>
+  <button>Objavi recenziju</button>
+</form>
+<form method="POST" action="/guestbook/clear">
+  <p><button>Obriši sve recenzije</button></p>
+</form>
