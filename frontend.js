@@ -54,24 +54,24 @@ app.get("/", function (req, res) {
 });
 
 // XSS
-app.get("/guestbook", async function (req, res) {
+app.get("/recenzija", async function (req, res) {
   const messages = await (await api("GET", "/api/messages")).json();
   let list = "";
   for (const m of messages) {
     const text = req.settings.xssVulnerable ? m.text : escapeHtml(m.text);
     list += "<p><b>" + escapeHtml(m.author) + ":</b> " + text + "</p>";
   }
-  res.send(page(req, render("guestbook", { messages: list })));
+  res.send(page(req, render("recenzija", { messages: list })));
 });
 
-app.post("/guestbook", async function (req, res) {
+app.post("/recenzija", async function (req, res) {
   await api("POST", "/api/messages", { author: "posjetitelj", text: String(req.body.message) });
-  res.redirect("/guestbook");
+  res.redirect("/recenzija");
 });
 
-app.post("/guestbook/clear", async function (req, res) {
+app.post("/recenzija/clear", async function (req, res) {
   await api("DELETE", "/api/messages");
-  res.redirect("/guestbook");
+  res.redirect("/recenzija");
 });
 
 // Kontrola
