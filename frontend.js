@@ -1,14 +1,15 @@
 const express = require("express");
 const fs = require("fs");
+const { sign, getRole } = require("./jwt");
 require("./backend");
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 
-function api(method, path, body, role) {
+function api(method, path, body, token) {
   return fetch("http://127.0.0.1:4000" + path, {
     method: method,
-    headers: { "X-Role": encodeURIComponent(role || "") },
+    headers: { "X-Token": encodeURIComponent(token || "") },
     body: body ? JSON.stringify(body) : undefined
   });
 }
@@ -16,7 +17,6 @@ function api(method, path, body, role) {
 function escapeHtml(text) {
   return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
-
 
 function render(name, values) {
   let html = fs.readFileSync(__dirname + "/views/" + name + ".html", "utf8");
@@ -26,13 +26,22 @@ function render(name, values) {
   return html;
 }
 
-//AKO JE XSS onda se cookie moze procitati jer nema HttpOnlyFlag
-function setRole(res, role, settings) {
-  res.setHeader("Set-Cookie", "role=" + role + "; Path=/" + (settings.xssVulnerable ? "" : "; HttpOnly"));
+function getCookie(req, name) {
+  for (const part of (req.headers.cookie || "").split(";")) {
+    const pair = part.trim().split("=");
+    if (pair[0] === name) return pair[1];
+  }
+  return "";
+}
+
+// XSS mice HttpOnly flag
+function setCookie(res, token, settings) {
+  res.setHeader("Set-Cookie", "token=" + token + "; Path=/" + (settings.xssVulnerable ? "" : "; HttpOnly"));
 }
 
 function page(req, content) {
   return render("layout", {
+    token: escapeHtml(req.token),
     role: req.role,
     xssChecked: req.settings.xssVulnerable ? "checked" : "",
     accessChecked: req.settings.accessVulnerable ? "checked" : "",
@@ -40,12 +49,15 @@ function page(req, content) {
   });
 }
 
-//Svaki korisnik dobiva cookie role=user
+// Svaki posjetitelj dobiva cookie
 app.use(async function (req, res, next) {
   req.settings = await (await api("GET", "/api/settings")).json();
-  const cookie = req.headers.cookie || "";
-  req.role = cookie.includes("role=admin") ? "admin" : "user";
-  if (!cookie.includes("role=")) setRole(res, "user", req.settings);
+  req.token = getCookie(req, "token");
+  if (!req.token) {
+    req.token = sign({ role: "user" });
+    setCookie(res, req.token, req.settings);
+  }
+  req.role = getRole(req.token, !req.settings.accessVulnerable);
   next();
 });
 
@@ -65,7 +77,7 @@ app.get("/recenzija", async function (req, res) {
 });
 
 app.post("/recenzija", async function (req, res) {
-  await api("POST", "/api/messages", { author: "posjetitelj", text: String(req.body.message) });
+  await api("POST", "/api/messages", { author: "posjetitelj (" + req.role + ")", text: String(req.body.message) });
   res.redirect("/recenzija");
 });
 
@@ -74,11 +86,11 @@ app.post("/recenzija/clear", async function (req, res) {
   res.redirect("/recenzija");
 });
 
-// Kontrola
+// Kontrola pristupa
 app.get("/admin", async function (req, res) {
-  const result = await api("GET", "/api/admin", null, req.role);
+  const result = await api("GET", "/api/admin", null, req.token);
   if (result.status !== 200) {
-    return res.status(403).send(page(req, "<h2>403 Zabranjeno</h2><p>Admin panel je dostupan samo s kolačićem role=admin.</p>"));
+    return res.status(403).send(page(req, "<h2>403 Zabranjeno</h2><p>Admin panel je dostupan samo s tokenom u kojem je role=admin.</p>"));
   }
   let rows = "";
   for (const e of await result.json()) {
@@ -92,12 +104,13 @@ app.post("/settings", async function (req, res) {
     xssVulnerable: req.body.xss === "on",
     accessVulnerable: req.body.access === "on"
   })).json();
-  setRole(res, req.role, settings);
+  setCookie(res, req.token, settings);
   res.redirect("/");
 });
 
+// izdaje ispravno potpisan token za user ili admin
 app.post("/role", function (req, res) {
-  setRole(res, req.body.role === "admin" ? "admin" : "user", req.settings);
+  setCookie(res, sign({ role: req.body.role === "admin" ? "admin" : "user" }), req.settings);
   res.redirect("/");
 });
 

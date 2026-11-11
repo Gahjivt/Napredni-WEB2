@@ -2,6 +2,6 @@
 <p>Aplikacija namjerno sadrži dvije ranjivosti. Svaka se uključuje i isključuje potvrdnim okvirom iznad.</p>
 <ul>
   <li><b>Stored XSS</b>: rezenzija artikla.</li>
-  <li><b>Broken Access Control</b>: admin panel (<code>/admin</code>), kontrola pristupa temelji se na kolačiću <code>role</code>.</li>
+  <li><b>Broken Access Control</b>: admin panel (<code>/admin</code>), kontrola pristupa temelji se na JWT-u u kolačiću <code>token</code>.</li>
 </ul>
-<p>Svatko tko otvori stranicu dobiva kolačić <code>role=user</code>.</p>
+<p>Svatko tko otvori stranicu dobiva kolačić <code>token</code>, JWT potpisan tajnom <code>JWT_SECRET</code> s podatkom <code>role=user</code>.</p>

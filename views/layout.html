@@ -6,7 +6,7 @@
 </head>
 <body>
   <h1>Napredni WEB labos 2</h1>
-  <p>Vaš kolačić: <b>role={{role}}</b></p>
+  <p>Vaš kolačić <code>token</code> (JWT): <code style="word-break: break-all">{{token}}</code><br>Uloga koju poslužitelj priznaje: <b>{{role}}</b></p>
   <p><a href="/">Početna</a> | <a href="/recenzija">Recenzije artikla</a> | <a href="/admin">Admin panel</a></p>
 
   <form method="POST" action="/settings">
@@ -17,7 +17,7 @@
   </form>
 
   <form method="POST" action="/role">
-    <p>Postavi kolačić: <button name="role" value="user">role=user</button> <button name="role" value="admin">role=admin</button></p>
+    <p>Simulacija prijave (poslužitelj izdaje ispravno potpisan token): <button name="role" value="user">user</button> <button name="role" value="admin">admin</button></p>
   </form>
   <hr>
   {{content}}

@@ -1,4 +1,5 @@
 const http = require("http");
+const { getRole } = require("./jwt");
 
 const settings = { xssVulnerable: true, accessVulnerable: true };
 let messages = []
@@ -7,7 +8,7 @@ const secrets = names.map(function (name, i) {
   return { id: i + 1, name: name, secret: process.env[name] };
 });
 
-function handle(method, url, body, role) {
+function handle(method, url, body, token) {
   if (method === "GET" && url === "/api/settings") {
     return [200, settings];
   }
@@ -28,8 +29,9 @@ function handle(method, url, body, role) {
     return [200, { ok: true }];
   }
   if (method === "GET" && url === "/api/admin") {
-
-    if (!settings.accessVulnerable && role !== "admin") {
+    //  potpis tokena se ne provjerava
+    const role = getRole(token, !settings.accessVulnerable);
+    if (role !== "admin") {
       return [403, { error: "Zabranjeno" }];
     }
     return [200, secrets];
@@ -44,8 +46,8 @@ http.createServer(function (req, res) {
     let status, result;
     try {
       const body = raw ? JSON.parse(raw) : {};
-      const role = decodeURIComponent(req.headers["x-role"] || "");
-      [status, result] = handle(req.method, req.url, body, role);
+      const token = decodeURIComponent(req.headers["x-token"] || "");
+      [status, result] = handle(req.method, req.url, body, token);
     } catch (e) {
       status = 400;
       result = { error: "Neispravan zahtjev" };
