@@ -1,7 +1,26 @@
 <h2>O aplikaciji</h2>
-<p>Aplikacija namjerno sadrži dvije ranjivosti. Svaka se uključuje i isključuje potvrdnim okvirom iznad.</p>
+<p>Aplikacija namjerno sadrži dvije ranjivosti. Svaka se uključuje i isključuje checkboxom iznad.</p>
 <ul>
-  <li><b>Stored XSS</b>: rezenzija artikla.</li>
+  <li><b>Stored XSS</b>: recenzija artikla.</li>
   <li><b>Broken Access Control</b>: admin panel (<code>/admin</code>), kontrola pristupa temelji se na JWT-u u kolačiću <code>token</code>.</li>
 </ul>
 <p>Svatko tko otvori stranicu dobiva kolačić <code>token</code>, JWT potpisan tajnom <code>JWT_SECRET</code> s podatkom <code>role=user</code>.</p>
+
+<h2>Kako izvesti Stored XSS</h2>
+<ol>
+  <li>Označite checkbox "XSS ranjivost UKLJUČENA".</li>
+  <li>Otvorite "Recenzije artikla" i objavite recenziju: <code>&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code></li>
+  <li>Pri svakom prikazu stranice izvršit će se skripta i prikazati kolačić. Isto vide i svi ostali posjetitelji jer je recenzija spremljena na poslužitelju.</li>
+  <li>Uncheckajte checkbox: ista recenzija ispisuje se kao običan tekst, a kolačić je <code>HttpOnly</code> pa ga skripta ne vidi.</li>
+</ol>
+
+<h2>Kako izvesti Broken Access Control</h2>
+<ol>
+  <li>Označite checkbox "Broken Access Control ranjivost UKLJUČENA".</li>
+  <li>Otvorite <code>/admin</code> s običnim tokenom: dobivate <b>403</b>.</li>
+  <li>U konzoli preglednika (F12) upišite krivotvoren token (u podacima <code>{"role":"admin"}</code>, potpis proizvoljan):
+    <pre>document.cookie = "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4ifQ.x;"</pre>
+  </li>
+  <li>Osvježite <code>/admin</code>: poslužitelj ne provjerava potpis pa se prikazuje admin panel.</li>
+  <li>Uncheckajte checkbox i osvježite stranicu: isti token sada daje <b>403</b>, jer poslužitelj provjerava potpis. Pristup ima samo ispravno potpisan token s <code>role=admin</code> (gumb "admin" gore izdaje takav token).</li>
+</ol>
