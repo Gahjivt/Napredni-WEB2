@@ -1,6 +1,6 @@
-<p>Upute: Ako je vulnerability uključen, poslužitelj ne provjerava potpis JWT-a, pa možete sami izmijeniti kolačić token</code>, a potpis je bilo što. Primjer, u konzoli preglednika:</p>
+<p>Upute: Ako je vulnerability uključen, poslužitelj ne provjerava potpis JWT-a, pa možete sami izmijeniti kolačić token, a potpis je bilo što. Primjer, u konzoli preglednika:</p>
 <pre>document.cookie = "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4ifQ.x;"</pre>
-<p>Ako je vulnerability isključen, poslužitelj provjerava potpis tajnom JWT_SECRET</code>, pa izmijenjen token ne prolazi i dobivate 403. Pristup imaju samo tokeni s ispravnim potpisom i role=admin</p>
+<p>Ako je vulnerability isključen, poslužitelj provjerava potpis tajnom JWT_SECRET, pa izmijenjen token ne prolazi i dobivate 403. Pristup imaju samo tokeni s ispravnim potpisom i role=admin</p>
 
 <h2>Admin panel</h2>
 <table border="1" cellpadding="6">
