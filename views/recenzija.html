@@ -1,5 +1,5 @@
-<p>Upute: Ako je vulnerability ukljucen, mozemo poslati payload poput <strong>&lt;script&gt;alert("Tekst")&lt;/script&gt;</strong> koji će pri svakome renderanju teksta kreirati alert.</p>
-<p>Ako ukljucimo filtriranje znakova znakovi <,> i slicni ce biti zamjenjeni sa &amp;lt; i &amp;gt;</p>
+<p>Upute: Ako je vulnerability uključen, možemo poslati payload poput <strong>&lt;script&gt;alert("Tekst")&lt;/script&gt;</strong>, koji će pri svakom prikazu recenzije izvršiti alert.</p>
+<p>Ako je vulnerability isključen, znakovi <code>&lt;</code> i <code>&gt;</code> zamjenjuju se s <code>&amp;lt;</code> i <code>&amp;gt;</code>, pa se skripta ispisuje kao običan tekst.</p>
 <h2>Ostavite recenziju za artikl</h2>
 {{messages}}
 <form method="POST" action="/recenzija">
